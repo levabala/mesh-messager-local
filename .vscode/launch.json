@@ -10,7 +10,35 @@
       "name": "Launch Program",
       "program": "${workspaceFolder}/src/main.ts",
       "preLaunchTask": "tsc: build - tsconfig.json",
-      "outFiles": ["${workspaceFolder}/build/**/*.js"]
+      "outFiles": ["${workspaceFolder}/build/**/*.js"],
+      "smartStep": true
+    },
+    {
+      "name": "ts-node",
+      "type": "node",
+      "request": "launch",
+      "args": ["${workspaceRoot}/src/main.ts"],
+      "runtimeArgs": ["-r", "ts-node/register"],
+      "cwd": "${workspaceRoot}",
+      "protocol": "inspector",
+      "internalConsoleOptions": "openOnSessionStart",
+      "env": {
+        "TS_NODE_IGNORE": "false"
+      },
+      "smartStep": true
+      // "skipFiles": ["<node_internals>/**"]
+    },
+    {
+      "name": "ts-node v2",
+      "type": "node",
+      "request": "launch",
+      "args": ["${workspaceRoot}/src/main.ts"],
+      "runtimeArgs": ["--nolazy", "-r", "ts-node/register"],
+      "sourceMaps": true,
+      "cwd": "${workspaceRoot}",
+      "protocol": "inspector",
+      "smartStep": true,
+      "skipFiles": ["<node_internals>/**"]
     }
   ]
 }

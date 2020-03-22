@@ -1,35 +1,56 @@
 import { Node } from 'mesh-messager-core';
 
-import { addNode, communicationLocal, joinNode } from './communicationLocal';
+import { addNode, communicationLocal, connectedNodes, joinNode, kickSomeone } from './communicationLocal';
 
 function pickRandom<T>(arr: Array<T>): T {
   return arr[Math.floor(Math.random() * arr.length)];
 }
 
-const rootNode = new Node(communicationLocal);
+const rootNode = new Node(communicationLocal).setLogging(false);
 
-const nodes = new Array(30).fill(null).map(() => new Node(communicationLocal));
-const connectedNodes = [rootNode];
+async function addSomeNode() {
+  const n = new Node(communicationLocal).setLogging(false);
+  const p = joinNode(n, pickRandom(Object.values(connectedNodes)));
+
+  // console.log(`add ${Node.shortId(n.id)}`);
+
+  await p;
+  n.startLifecycle();
+}
 
 (async () => {
   addNode(rootNode);
 
-  await Promise.all(
-    nodes.map(async (n, i) => {
-      const p = joinNode(n, pickRandom(connectedNodes));
-      connectedNodes.push(n);
+  await Promise.all(new Array(60).fill(null).map(() => addSomeNode()));
 
-      return p;
-    })
-  );
+  console.log("firstly connectedNodes:", Object.keys(connectedNodes).length);
 
-  console.log("connectedNodes:", connectedNodes.length);
-
-  nodes.forEach(n => console.log(n.toString()));
-  nodes.forEach(n => n.startLifecycle());
+  // Object.values(connectedNodes).forEach(n => console.log(n.toString()));
 
   setInterval(() => {
+    if (Math.random() > 0.5) addSomeNode();
+  }, 2000);
+
+  setTimeout(
+    () =>
+      setInterval(() => {
+        if (Math.random() > 0.5) kickSomeone();
+      }, 2000),
+    2000
+  );
+
+  setInterval(() => {
+    console.clear();
     console.log("\n----");
-    nodes.forEach(n => console.log(n.toString()));
-  }, 5000);
+    Object.values(connectedNodes).forEach(n => console.log(n.toString()));
+    console.log("----\n");
+
+    // console.log(Object.values(connectedNodes)[0]);
+    console.log(Object.values(connectedNodes)[0].toString());
+    console.log(
+      Object.values(connectedNodes)[0]
+        .fingers.map(({ key, nodeId }) => `${key}: ${Node.shortId(nodeId)}`)
+        .join("\n")
+    );
+  }, 100);
 })();

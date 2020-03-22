@@ -37,8 +37,8 @@
       "sourceMaps": true,
       "cwd": "${workspaceRoot}",
       "protocol": "inspector",
-      "smartStep": true,
-      "skipFiles": ["<node_internals>/**"]
+      "smartStep": true
+      // "skipFiles": ["<node_internals>/**"]
     }
   ]
 }

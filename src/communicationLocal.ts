@@ -1,6 +1,29 @@
 import { Communication, Node, RequestType } from 'mesh-messager-core';
 
+function pickRandom<T>(arr: Array<T>): T {
+  return arr[Math.floor(Math.random() * arr.length)];
+}
+
 export const connectedNodes: Record<string, Node> = {};
+
+export function getConnectivityComponent(nodeIdRaw: bigint) {
+  const nodeId = nodeIdRaw.toString();
+  const usedNodes = [nodeId];
+
+  let node = connectedNodes[nodeId];
+  let component = 1;
+
+  while (!usedNodes.includes(node.successor.toString())) {
+    node = connectedNodes[node.successor.toString()];
+    if (!node) return component;
+
+    component++;
+
+    usedNodes.push(node.id.toString());
+  }
+
+  return component;
+}
 
 export const communicationLocal: Communication = {
   [RequestType.FindSuccessorForId]: async (req, tar, { key }) => {
@@ -34,6 +57,11 @@ export const communicationLocal: Communication = {
     if (!connectedNodes[tar.toString()]) throw new Error("the node is offline");
 
     return { id: connectedNodes[tar.toString()].successor };
+  },
+  [RequestType.GetSuccessorsList]: async (req, tar) => {
+    if (!connectedNodes[tar.toString()]) throw new Error("the node is offline");
+
+    return { list: connectedNodes[tar.toString()].successorList };
   }
 };
 
@@ -50,14 +78,39 @@ export async function joinNode(node: Node, nodeToJoin: Node) {
 }
 
 export function kickSomeone() {
-  const keys = Object.keys(connectedNodes);
-  if (!keys.length) return;
+  const nodes = Object.values(connectedNodes);
+  const lowestConnectivity = nodes.reduce(
+    (acc, val) => Math.min(getConnectivityComponent(val.id), acc),
+    Infinity
+  );
+  const lowestNodes = nodes.filter(
+    node => getConnectivityComponent(node.id) === lowestConnectivity
+  );
 
-  const index = Math.floor(Math.random() * keys.length);
+  const nodeToRemove = pickRandom(lowestNodes);
 
-  // console.log(`kick ${Node.shortId(keys[index])}`);
+  nodeToRemove.stopLifecycle();
+  delete connectedNodes[nodeToRemove.id.toString()];
+}
 
-  const node = connectedNodes[keys[index]];
-  node.stopLifecycle();
-  delete connectedNodes[keys[index]];
+export async function addSomeNode() {
+  const n = new Node(communicationLocal).setLogging(false);
+  const nodes = Object.values(connectedNodes);
+  const highestConnectivity = nodes.reduce(
+    (acc, val) => Math.max(getConnectivityComponent(val.id), acc),
+    0
+  );
+  const highestNodes = nodes.filter(
+    node => getConnectivityComponent(node.id) === highestConnectivity
+  );
+
+  const nodeToJoin = pickRandom(highestNodes);
+
+  const p = joinNode(n, nodeToJoin);
+
+  // console.log(
+  //   `${n.id} joins to ${nodeToJoin.id} with component == ${highestConnectivity}`
+  // );
+
+  return p;
 }

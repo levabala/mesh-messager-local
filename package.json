@@ -1,4 +1,6 @@
 {
+  "name": "mesh-messager-local",
+  "version": "0.0.1",
   "scripts": {
     "coverage": "nyc -r lcov -r text -e .ts -x \"src/*.spec.ts\" yarn test",
     "build": "tsc",

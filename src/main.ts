@@ -47,8 +47,6 @@ const rootNode = new Node(communicationLocal).setLogging(false);
 
   // Object.values(connectedNodes).forEach(n => console.log(n.toString()));
 
-  // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-  // ---------------------------------------------------- addSomeNode -> startLifecycle
   const changeInterval = 1000;
   setInterval(() => {
     (async () => {

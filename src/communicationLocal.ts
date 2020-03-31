@@ -77,40 +77,50 @@ export async function joinNode(node: Node, nodeToJoin: Node) {
   await node.joinNode(nodeToJoin.id);
 }
 
-export function kickSomeone() {
+export function kickSomeone(lowest = false) {
   const nodes = Object.values(connectedNodes);
-  const lowestConnectivity = nodes.reduce(
-    (acc, val) => Math.min(getConnectivityComponent(val.id), acc),
-    Infinity
-  );
-  const lowestNodes = nodes.filter(
-    node => getConnectivityComponent(node.id) === lowestConnectivity
-  );
 
-  const nodeToRemove = pickRandom(lowestNodes);
+  let nodeToRemove;
+
+  if (lowest) {
+    const lowestConnectivity = nodes.reduce(
+      (acc, val) => Math.min(getConnectivityComponent(val.id), acc),
+      Infinity
+    );
+    const lowestNodes = nodes.filter(
+      node => getConnectivityComponent(node.id) === lowestConnectivity
+    );
+
+    nodeToRemove = pickRandom(lowestNodes);
+  } else nodeToRemove = pickRandom(nodes);
 
   nodeToRemove.stopLifecycle();
   delete connectedNodes[nodeToRemove.id.toString()];
 }
 
-export async function addSomeNode() {
+export async function addSomeNode(highest = false) {
   const n = new Node(communicationLocal).setLogging(false);
   const nodes = Object.values(connectedNodes);
-  const highestConnectivity = nodes.reduce(
-    (acc, val) => Math.max(getConnectivityComponent(val.id), acc),
-    0
-  );
-  const highestNodes = nodes.filter(
-    node => getConnectivityComponent(node.id) === highestConnectivity
-  );
 
-  const nodeToJoin = pickRandom(highestNodes);
+  let nodeToJoin;
+  if (highest) {
+    const highestConnectivity = nodes.reduce(
+      (acc, val) => Math.max(getConnectivityComponent(val.id), acc),
+      0
+    );
+    const highestNodes = nodes.filter(
+      node => getConnectivityComponent(node.id) === highestConnectivity
+    );
+
+    nodeToJoin = pickRandom(highestNodes);
+  } else nodeToJoin = pickRandom(nodes);
 
   const p = joinNode(n, nodeToJoin);
+  await p;
 
   // console.log(
   //   `${n.id} joins to ${nodeToJoin.id} with component == ${highestConnectivity}`
   // );
 
-  return p;
+  return n;
 }

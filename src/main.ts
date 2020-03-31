@@ -49,9 +49,14 @@ const rootNode = new Node(communicationLocal).setLogging(false);
 
   // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   // ---------------------------------------------------- addSomeNode -> startLifecycle
-  const changeInterval = 200;
+  const changeInterval = 1000;
   setInterval(() => {
-    if (Math.random() > 0.5) addSomeNode();
+    (async () => {
+      if (Math.random() > 0.5) {
+        const n = await addSomeNode();
+        n.startLifecycle();
+      }
+    })();
   }, changeInterval);
 
   setTimeout(

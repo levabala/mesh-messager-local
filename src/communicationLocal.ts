@@ -102,6 +102,11 @@ export async function addSomeNode(highest = false) {
   const n = new Node(communicationLocal).setLogging(false);
   const nodes = Object.values(connectedNodes);
 
+  if (!nodes.length) {
+    addNode(n);
+    return n;
+  }
+
   let nodeToJoin;
   if (highest) {
     const highestConnectivity = nodes.reduce(

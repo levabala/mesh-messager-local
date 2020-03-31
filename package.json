@@ -1,6 +1,6 @@
 {
   "name": "mesh-messager-local",
-  "version": "0.0.10",
+  "version": "0.0.11",
   "main": "./build/index.js",
   "files": [
     "build"
@@ -29,7 +29,7 @@
     "eslint-plugin-prettier": "^3.1.2",
     "jest": "^25.1.0",
     "lodash": "^4.17.15",
-    "mesh-messager-core": "^0.0.1",
+    "mesh-messager-core": "https://github.com/levabala/mesh-messager-core",
     "nodemon": "^2.0.2",
     "nyc": "^15.0.0",
     "ts-jest": "^25.2.1",
